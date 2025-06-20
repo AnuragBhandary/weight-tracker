@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weight Tracker</title>
+        <link rel = "stylesheet" href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    </head>
+    <body class = "container mt-5">
+        <h2 class = "mb-4">Weight Tracker</h2>
+
+        <form method = "POST" class = "mb-4">
+            <div class = "mb-3">
+                <label> Weight (kg):</label>
+                <input type = "number" step = "0.1" name = "weight" required class = "form-control">
+            </div>
+            <div class = "mb-3">
+                <label>Date:</label>
+                <input type = "date" name = "date" required class = "form-control">
+            </div>
+            <button type = "submit" class = "btn btn-primary">Add Entry</button>
+        </form>
+
+        <h4>Your Entries:</h4>
+        <table class = "table">
+            <thead>
+                <tr><th>Date</th><th>Weight</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for w in weights %}
+                <tr>
+                    <td>{{ w[2] }}</td>
+                    <td>{{ w[1] }} kg</td>
+                    <td>
+                        <form action = "/delete/{{ w[0] }}" method = "POST" style = "display:inline;">
+                            <button class = "btn btn-danger btn-sm" onclick = "return confirm('Delete this entry?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4 class = "mt-5">Weekly Averages:</h4>
+        <table class = "table table-bordered">
+            <thead>
+                <tr>
+                    <th>Week</th>
+                    <th>Average Weight (kg)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for week, avg in weekly_averages %}
+                <tr>
+                    <td>{{ week }}</td>
+                    <td>{{ avg }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4 class = "mt-5">Weight Progress Chart</h4>
+        <canvas id = "weightChart" width = "400" height = "200"></canvas>
+
+        <script src = "https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            const weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_dates|tojson }},
+                    datasets: [{
+                        label: 'Weight (kg)',
+                        data: {{ chart_weights|tojson }},
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Weight (kg)'
+                            },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
